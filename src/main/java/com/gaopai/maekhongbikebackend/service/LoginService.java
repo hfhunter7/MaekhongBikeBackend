@@ -2,6 +2,7 @@ package com.gaopai.maekhongbikebackend.service;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.gaopai.maekhongbikebackend.LoginUsernameBean;
 import com.gaopai.maekhongbikebackend.bean.LoginBean;
 import com.gaopai.maekhongbikebackend.bean.RegisterBean;
 import com.gaopai.maekhongbikebackend.domain.*;
@@ -79,9 +80,9 @@ public class LoginService extends LoginJson {
         }
     }
 
-    public ObjectNode takeLoginWithUsername(String appName, RegisterBean registerBean) throws Exception {
+    public ObjectNode takeLoginWithUsername(String appName, LoginUsernameBean loginUsernameBean) throws Exception {
         if (appName.toLowerCase().equals(Constant.APP_NAME.USER)) {
-            return loginUser(registerBean);
+            return loginUser(loginUsernameBean);
         } else {
             throw new DataFormatException("bad request appName");
         }
@@ -120,28 +121,16 @@ public class LoginService extends LoginJson {
         return responseNode;
     }
 
-    private ObjectNode loginUser(RegisterBean registerBean) throws Exception {
+    private ObjectNode loginUser(LoginUsernameBean loginUsernameBean) throws Exception {
         ObjectNode responseNode = new ObjectNode(JsonNodeFactory.instance);
 
-        if (Utility.verifiedPasswordNotNull(registerBean.getPassword())) {
-            Users users = userRepositoryService.findByUsernameAndPassword(registerBean.getUsername(), registerBean.getPassword());
+        if (Utility.verifiedPasswordNotNull(loginUsernameBean.getPassword())) {
+            Users users = userRepositoryService.findByUsernameAndPassword(loginUsernameBean.getUsername(), loginUsernameBean.getPassword());
 
             if (users != null) {
                 // login
                 users.setLastLogin(DateUtil.getCurrentDateTime());
                 userRepositoryService.update(users);
-            } else {
-                // register
-                users = new Users();
-                users.setUsername(registerBean.getUsername());
-                users.setEmail(registerBean.getEmail());
-                users.setPassword(registerBean.getPassword());
-                users.setName(registerBean.getName());
-                users.setCreateDate(DateUtil.getCurrentDateTime());
-                users.setModifyDate(DateUtil.getCurrentDateTime());
-                users.setLastLogin(DateUtil.getCurrentDateTime());
-
-                users = userRepositoryService.save(users);
             }
 
             TokenUser token = tokenUserService.generateToken(users.getEmail(), users);

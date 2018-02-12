@@ -1,6 +1,7 @@
 package com.gaopai.maekhongbikebackend.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.gaopai.maekhongbikebackend.LoginUsernameBean;
 import com.gaopai.maekhongbikebackend.bean.LoginBean;
 import com.gaopai.maekhongbikebackend.bean.RegisterBean;
 import com.gaopai.maekhongbikebackend.domain.Trainer;
@@ -120,7 +121,7 @@ public class LoginController extends AbstractRestHandler implements Serializable
     public @ResponseBody
     ResponseEntity<?> loginWithUsername(
             @PathVariable String appName,
-            @RequestBody RegisterBean body,
+            @RequestBody LoginUsernameBean body,
             @RequestHeader(value = "Authorization") String Authorization,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
