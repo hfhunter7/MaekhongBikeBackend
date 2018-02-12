@@ -1,0 +1,144 @@
+### This is the main way to configure the application (other than annotations).
+### This files is in Yaml format but you can also do this using the traditional
+### Java properties file.
+
+spring:
+   #profiles.active: develop
+   profiles.active: staging
+---
+spring:
+  profiles: default   # this is for local development. For QA, Production override these values
+
+spring.jmx:
+   enabled: false
+
+spring.datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:bootexample;MODE=MySQL
+
+#default project info followed by actual injected pom-specified values.
+project:
+  name: maekhongbikebackend
+  version: 1.0.0
+  description: maekhongbikebackend
+info:
+  build:
+    artifact: ${project.artifactId}
+    name: ${project.name}
+    description: ${project.description}
+    version: ${project.version}
+
+#logging.level.org.springframework.web: DEBUG
+#logging.level.org.hibernate: ERROR
+
+---
+spring:
+  profiles: develop
+
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/trainingcenterdb
+    username: root
+    password: root
+    max-active: 1000
+    max-idle: 100
+    min-idle: 100
+    initial-size: 10
+    test-on-borrow: true
+    test-while-idle: true
+    test-on-return: true
+    min-evictable-idle-time-millis: 5000
+    time-between-eviction-runs-millis: 5000
+    validation-query: select 1
+
+  jpa:
+    hibernate:
+      dialect: org.hibernate.dialect.MySQLInnoDBDialect
+      ddl-auto: update
+      show-sql: false
+
+  management.service:
+    name: 'develop profile:'
+
+server:
+    port: 9999
+
+security:
+    basic:
+      enabled: false
+---
+
+spring:
+  profiles: staging
+
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+#    url: jdbc:mysql://128.199.250.71:3306/trainingcenterdb?useUnicode=yes&characterEncoding=UTF-8
+#    username: gaopai
+#    password: g@op@i
+    url: jdbc:mysql://35.201.192.129:3306/maekhongbike
+    username: root
+    password: admin1234
+    max-active: 1000
+    max-idle: 100
+    min-idle: 100
+    initial-size: 10
+    test-on-borrow: true
+    test-while-idle: true
+    test-on-return: true
+    min-evictable-idle-time-millis: 5000
+    time-between-eviction-runs-millis: 5000
+    validation-query: select 1
+
+  jpa:
+    hibernate:
+      dialect: org.hibernate.dialect.MySQLInnoDBDialect
+      ddl-auto: update
+      show-sql: false
+
+  management.service:
+    name: 'staging profile:'
+
+server:
+    port: 9999
+
+security:
+    basic:
+      enabled: false
+
+---
+
+spring:
+  profiles: google
+
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://35.201.192.129:3306/maekhongbike?useUnicode=yes&characterEncoding=UTF-8
+    username: root
+    password: admin1234
+    max-active: 1000
+    max-idle: 100
+    min-idle: 100
+    initial-size: 10
+    test-on-borrow: true
+    test-while-idle: true
+    test-on-return: true
+    min-evictable-idle-time-millis: 5000
+    time-between-eviction-runs-millis: 5000
+    validation-query: select 1
+
+  jpa:
+    hibernate:
+      dialect: org.hibernate.dialect.MySQLInnoDBDialect
+      ddl-auto: none
+      show-sql: false
+
+  management.service:
+    name: 'google profile:'
+
+server:
+    port: 9999
+
+security:
+    basic:
+      enabled: false
