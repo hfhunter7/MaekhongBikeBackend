@@ -38,7 +38,7 @@ public class ReserveService {
     @Transactional
     public ObjectNode createReserve(Users user, CreateReserveBean body) throws Exception {
         Reserve reserve = new Reserve();
-        reserve.setCreateBy(user.getUsername());
+        reserve.setUser(user);
         reserve.setAdult(body.getAdult());
         reserve.setChild(body.getChild());
         reserve.setReserve_date(body.getReserve_date());
@@ -95,7 +95,7 @@ public class ReserveService {
 
     public ObjectNode getReserveDetail(Long id, Users user) throws Exception {
         Reserve reserve = reserveRepositoryService.find(id);
-        Utility.verifiedIsNullObject(reserve, "course");
+        Utility.verifiedIsNullObject(reserve, "reserve");
         List<Equipment> equipmentList = equipmentRepositoryService.findByReserve(reserve);
         ObjectNode jsonNodes = createReserveJson(reserve, equipmentList, user);
 
@@ -105,7 +105,7 @@ public class ReserveService {
     private ObjectNode createReserveJson(Reserve reserve, List<Equipment> equipments) {
         ObjectNode jsonNodes = new ObjectNode(JsonNodeFactory.instance);
         jsonNodes.put("id", reserve.getId());
-        jsonNodes.put("create_by", reserve.getCreateBy());
+        jsonNodes.put("create_by", reserve.getUser().getName());
         jsonNodes.put("adult", reserve.getAdult());
         jsonNodes.put("child", reserve.getChild());
         jsonNodes.put("rent_status", reserve.getRent_status());
@@ -121,7 +121,7 @@ public class ReserveService {
     private ObjectNode createReserveJson(Reserve reserve, List<Equipment> equipments, Users user) {
         ObjectNode jsonNodes = new ObjectNode(JsonNodeFactory.instance);
         jsonNodes.put("id", reserve.getId());
-        jsonNodes.put("create_by", reserve.getCreateBy());
+        jsonNodes.put("create_by", reserve.getUser().getName());
         jsonNodes.put("adult", reserve.getAdult());
         jsonNodes.put("child", reserve.getChild());
         jsonNodes.put("rent_status", reserve.getRent_status());

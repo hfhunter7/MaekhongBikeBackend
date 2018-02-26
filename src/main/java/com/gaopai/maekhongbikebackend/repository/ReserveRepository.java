@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface ReserveRepository extends JpaRepository<Reserve, Long> {
 
-    @Query("select r from Reserve r where r.createBy =:username")
+    @Query("select r from Reserve r where r.user.username =:username")
     List<Reserve> findByCreateBy(@Param("username") String username);
 
 }

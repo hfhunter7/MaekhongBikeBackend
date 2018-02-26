@@ -14,13 +14,15 @@ public class Reserve implements Serializable{
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String createBy;
     private String route;
     private String reserve_date;
     private long adult;
     private long child;
     private String rent_status;
     private String reserve_number;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Users user;
 
     public Reserve(){
 
@@ -32,14 +34,6 @@ public class Reserve implements Serializable{
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getCreateBy() {
-        return createBy;
-    }
-
-    public void setCreateBy(String createBy) {
-        this.createBy = createBy;
     }
 
     public String getRoute() {
@@ -88,5 +82,13 @@ public class Reserve implements Serializable{
 
     public void setReserve_number(String reserve_number) {
         this.reserve_number = reserve_number;
+    }
+
+    public Users getUser() {
+        return user;
+    }
+
+    public void setUser(Users user) {
+        this.user = user;
     }
 }

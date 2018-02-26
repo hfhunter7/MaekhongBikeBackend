@@ -3,6 +3,7 @@ package com.gaopai.maekhongbikebackend.domain;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -33,6 +34,9 @@ public class Users implements Serializable{
 
     @OneToOne(mappedBy = "users", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     public TokenUser token;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Reserve> reserves;
 
     public Users() {
 
@@ -148,5 +152,13 @@ public class Users implements Serializable{
 
     public void setToken(TokenUser token) {
         this.token = token;
+    }
+
+    public List<Reserve> getReserves() {
+        return reserves;
+    }
+
+    public void setReserves(List<Reserve> reserves) {
+        this.reserves = reserves;
     }
 }
