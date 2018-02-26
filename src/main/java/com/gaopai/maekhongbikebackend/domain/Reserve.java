@@ -20,6 +20,7 @@ public class Reserve implements Serializable{
     private long adult;
     private long child;
     private String rent_status;
+    private String reserve_number;
 
     public Reserve(){
 
@@ -79,5 +80,13 @@ public class Reserve implements Serializable{
 
     public void setRent_status(String rent_status) {
         this.rent_status = rent_status;
+    }
+
+    public String getReserve_number() {
+        return reserve_number;
+    }
+
+    public void setReserve_number(String reserve_number) {
+        this.reserve_number = reserve_number;
     }
 }

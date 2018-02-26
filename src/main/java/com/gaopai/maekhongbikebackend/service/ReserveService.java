@@ -12,6 +12,7 @@ import com.gaopai.maekhongbikebackend.repository.impl.ReserveEquipmentRepository
 import com.gaopai.maekhongbikebackend.repository.impl.ReserveRepositoryService;
 import com.gaopai.maekhongbikebackend.utils.DateUtil;
 import com.gaopai.maekhongbikebackend.utils.Utility;
+import com.gaopai.maekhongbikebackend.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ public class ReserveService {
         reserve.setReserve_date(body.getReserve_date());
         reserve.setRent_status(body.getRent_status());
         reserve.setRoute(body.getRoute());
+        reserve.setReserve_number(Utils.randomString(8).toUpperCase());
 
         try {
             reserve = reserveRepositoryService.save(reserve);
@@ -91,16 +93,32 @@ public class ReserveService {
         return arrayNode;
     }
 
-    public ObjectNode getReserveDetail(Long id , Users user) throws Exception {
+    public ObjectNode getReserveDetail(Long id, Users user) throws Exception {
         Reserve reserve = reserveRepositoryService.find(id);
         Utility.verifiedIsNullObject(reserve, "course");
         List<Equipment> equipmentList = equipmentRepositoryService.findByReserve(reserve);
-        ObjectNode jsonNodes = createReserveJson(reserve, equipmentList ,user);
+        ObjectNode jsonNodes = createReserveJson(reserve, equipmentList, user);
 
         return jsonNodes;
     }
 
-    private ObjectNode createReserveJson(Reserve reserve , List<Equipment> equipments) {
+    private ObjectNode createReserveJson(Reserve reserve, List<Equipment> equipments) {
+        ObjectNode jsonNodes = new ObjectNode(JsonNodeFactory.instance);
+        jsonNodes.put("id", reserve.getId());
+        jsonNodes.put("create_by", reserve.getCreateBy());
+        jsonNodes.put("adult", reserve.getAdult());
+        jsonNodes.put("child", reserve.getChild());
+        jsonNodes.put("rent_status", reserve.getRent_status());
+        jsonNodes.put("reserve_date", reserve.getReserve_date());
+        jsonNodes.put("route", reserve.getRoute());
+        jsonNodes.put("reserve_number", reserve.getReserve_number());
+
+        jsonNodes.set("equipments", createEquipmentArrayNode(equipments));
+
+        return jsonNodes;
+    }
+
+    private ObjectNode createReserveJson(Reserve reserve, List<Equipment> equipments, Users user) {
         ObjectNode jsonNodes = new ObjectNode(JsonNodeFactory.instance);
         jsonNodes.put("id", reserve.getId());
         jsonNodes.put("create_by", reserve.getCreateBy());
@@ -109,48 +127,30 @@ public class ReserveService {
         jsonNodes.put("rent_status", reserve.getRent_status());
         jsonNodes.put("reserve_date", String.valueOf(reserve.getReserve_date()));
         jsonNodes.put("route", reserve.getRoute());
+        jsonNodes.put("reserve_number", reserve.getReserve_number());
 
-        ArrayNode equipmentArrayNode = new ArrayNode(JsonNodeFactory.instance);
-        for(Equipment equipment : equipments){
-            ObjectNode equipmentNode = new ObjectNode(JsonNodeFactory.instance);
-            equipmentNode.put("id",equipment.getId());
-            equipmentNode.put("name",equipment.getName());
-            equipmentNode.put("price",String.valueOf(equipment.getPrice()));
-            equipmentArrayNode.add(equipmentNode);
-        }
-        jsonNodes.set("equipments",equipmentArrayNode);
-
-        return jsonNodes;
-    }
-
-    private ObjectNode createReserveJson(Reserve reserve , List<Equipment> equipments , Users user) {
-        ObjectNode jsonNodes = new ObjectNode(JsonNodeFactory.instance);
-        jsonNodes.put("id", reserve.getId());
-        jsonNodes.put("create_by", reserve.getCreateBy());
-        jsonNodes.put("adult", reserve.getAdult());
-        jsonNodes.put("child", reserve.getChild());
-        jsonNodes.put("rent_status", reserve.getRent_status());
-        jsonNodes.put("reserve_date", String.valueOf(reserve.getReserve_date()));
-        jsonNodes.put("route", reserve.getRoute());
-
-        ArrayNode equipmentArrayNode = new ArrayNode(JsonNodeFactory.instance);
-        for(Equipment equipment : equipments){
-            ObjectNode equipmentNode = new ObjectNode(JsonNodeFactory.instance);
-            equipmentNode.put("id",equipment.getId());
-            equipmentNode.put("name",equipment.getName());
-            equipmentNode.put("price",String.valueOf(equipment.getPrice()));
-            equipmentArrayNode.add(equipmentNode);
-        }
-        jsonNodes.set("equipments",equipmentArrayNode);
+        jsonNodes.set("equipments", createEquipmentArrayNode(equipments));
 
         ObjectNode userArrayNode = new ObjectNode(JsonNodeFactory.instance);
-        userArrayNode.put("username",user.getUsername());
-        userArrayNode.put("name",user.getName());
-        userArrayNode.put("email",user.getEmail());
-        userArrayNode.put("phone_number",user.getPhoneNumber());
+        userArrayNode.put("username", user.getUsername());
+        userArrayNode.put("name", user.getName());
+        userArrayNode.put("email", user.getEmail());
+        userArrayNode.put("phone_number", user.getPhoneNumber());
 
-        jsonNodes.set("user",userArrayNode);
+        jsonNodes.set("user", userArrayNode);
 
         return jsonNodes;
+    }
+
+    private ArrayNode createEquipmentArrayNode(List<Equipment> equipmentList) {
+        ArrayNode equipmentArrayNode = new ArrayNode(JsonNodeFactory.instance);
+        for (Equipment equipment : equipmentList) {
+            ObjectNode equipmentNode = new ObjectNode(JsonNodeFactory.instance);
+            equipmentNode.put("id", equipment.getId());
+            equipmentNode.put("name", equipment.getName());
+            equipmentNode.put("price", String.valueOf(equipment.getPrice()));
+            equipmentArrayNode.add(equipmentNode);
+        }
+        return equipmentArrayNode;
     }
 }
