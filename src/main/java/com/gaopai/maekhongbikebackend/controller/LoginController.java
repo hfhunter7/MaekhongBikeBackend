@@ -53,6 +53,9 @@ public class LoginController extends AbstractRestHandler implements Serializable
             if (appName.toLowerCase().equals(Constant.APP_NAME.TRAINER)) {
                 Trainer trainer = jwtService.verifyTokenTrainer(Authorization);
                 loginService.logout(trainer);
+            } else if (appName.toLowerCase().equals(Constant.APP_NAME.USER)) {
+                Users user = jwtService.verifyTokenUser(Authorization);
+                loginService.logout(user);
             } else if (appName.toLowerCase().equals(Constant.APP_NAME.ADMIN)) {
                 return null;
             } else {

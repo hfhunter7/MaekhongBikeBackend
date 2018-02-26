@@ -207,6 +207,15 @@ public class LoginService extends LoginJson {
         }
     }
 
+    public void logout(Users user) {
+        try {
+            user.getToken().setExpireDate(expireToken());
+            userRepositoryService.save(user);
+        } catch (DataFormatException e) {
+            throw new DataFormatException("Invalid Token.");
+        }
+    }
+
     private Timestamp expireToken() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(DateUtil.getCurrentDate());
