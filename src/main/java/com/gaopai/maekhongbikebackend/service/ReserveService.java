@@ -3,8 +3,7 @@ package com.gaopai.maekhongbikebackend.service;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.gaopai.maekhongbikebackend.bean.reserve.CreateReserveBean;
-import com.gaopai.maekhongbikebackend.bean.reserve.ReserveEquipmentBean;
+import com.gaopai.maekhongbikebackend.bean.reserve.*;
 import com.gaopai.maekhongbikebackend.domain.*;
 import com.gaopai.maekhongbikebackend.exception.DataFormatException;
 import com.gaopai.maekhongbikebackend.repository.impl.EquipmentRepositoryService;
@@ -45,6 +44,7 @@ public class ReserveService {
         reserve.setRent_status(body.getRent_status());
         reserve.setRoute(body.getRoute());
         reserve.setReserve_number(Utils.randomString(8).toUpperCase());
+        reserve.setStatus_payment(body.getStatus_payment());
 
         try {
             reserve = reserveRepositoryService.save(reserve);
@@ -93,11 +93,86 @@ public class ReserveService {
         return arrayNode;
     }
 
+    @Transactional
+    public ArrayNode updateStatusPayment(UpdateStatusPaymentBean body, Long reserve_id , Users user) throws Exception {
+        Reserve res = reserveRepositoryService.find(reserve_id);
+
+        res.setStatus_payment(body.getStatus_payment());
+
+        try {
+            reserveRepositoryService.update(res);
+            List<Reserve> reserves = reserveRepositoryService.findAll();
+            ArrayNode arrayNode = new ArrayNode(JsonNodeFactory.instance);
+            if (reserves.size() > 0) {
+                for (Reserve reserve : reserves) {
+                    List<Equipment> equipmentList = equipmentRepositoryService.findByReserve(reserve);
+                    arrayNode.add(createReserveJson(reserve, equipmentList));
+                }
+            }
+            return arrayNode;
+        } catch (DataFormatException e) {
+            throw new DataFormatException("update reserve child fail.");
+        }
+
+    }
+
+    @Transactional
+    public ObjectNode updateChild(UpdateChildBean body, Long reserve_id) throws Exception {
+        Reserve res = reserveRepositoryService.find(reserve_id);
+
+        res.setChild(body.getChild());
+
+        try {
+            reserveRepositoryService.update(res);
+
+            List<Equipment> equipmentList = equipmentRepositoryService.findByReserve(res);
+            ObjectNode jsonNodes = createReserveJson(res, equipmentList);
+
+            return jsonNodes;
+        } catch (DataFormatException e) {
+            throw new DataFormatException("update reserve adult fail.");
+        }
+
+    }
+
+    @Transactional
+    public ObjectNode updateAdult(UpdateAdultBean body, Long reserve_id) throws Exception {
+        Reserve res = reserveRepositoryService.find(reserve_id);
+
+        res.setAdult(body.getAdult());
+
+        try {
+            reserveRepositoryService.update(res);
+
+            List<Equipment> equipmentList = equipmentRepositoryService.findByReserve(res);
+            ObjectNode jsonNodes = createReserveJson(res, equipmentList);
+
+            return jsonNodes;
+        } catch (DataFormatException e) {
+            throw new DataFormatException("update reserve status payment fail.");
+        }
+
+    }
+
+    public ArrayNode getAllReserves() throws Exception {
+        List<Reserve> reserves = reserveRepositoryService.findAll();
+        Utility.verifiedIsNullObject(reserves, "courses");
+
+        ArrayNode arrayNode = new ArrayNode(JsonNodeFactory.instance);
+        if (reserves.size() > 0) {
+            for (Reserve reserve : reserves) {
+                List<Equipment> equipmentList = equipmentRepositoryService.findByReserve(reserve);
+                arrayNode.add(createReserveJson(reserve, equipmentList));
+            }
+        }
+        return arrayNode;
+    }
+
     public ObjectNode getReserveDetail(Long id, Users user) throws Exception {
         Reserve reserve = reserveRepositoryService.find(id);
         Utility.verifiedIsNullObject(reserve, "reserve");
         List<Equipment> equipmentList = equipmentRepositoryService.findByReserve(reserve);
-        ObjectNode jsonNodes = createReserveJson(reserve, equipmentList, user);
+        ObjectNode jsonNodes = createReserveJson(reserve, equipmentList);
 
         return jsonNodes;
     }
@@ -112,8 +187,17 @@ public class ReserveService {
         jsonNodes.put("reserve_date", reserve.getReserve_date());
         jsonNodes.put("route", reserve.getRoute());
         jsonNodes.put("reserve_number", reserve.getReserve_number());
+        jsonNodes.put("status_payment", reserve.getStatus_payment());
 
         jsonNodes.set("equipments", createEquipmentArrayNode(equipments));
+
+        ObjectNode userNode = new ObjectNode(JsonNodeFactory.instance);
+        userNode.put("username", reserve.getUser().getUsername());
+        userNode.put("name", reserve.getUser().getName());
+        userNode.put("email", reserve.getUser().getEmail());
+        userNode.put("phone_number", reserve.getUser().getPhoneNumber());
+
+        jsonNodes.set("user", userNode);
 
         return jsonNodes;
     }
@@ -152,5 +236,37 @@ public class ReserveService {
             equipmentArrayNode.add(equipmentNode);
         }
         return equipmentArrayNode;
+    }
+
+    public void deleteReserveById(Long id , Users user) {
+        Reserve reserve = reserveRepositoryService.find(id);
+        Equipment equipment = null;
+
+        if (reserve == null) {
+            throw new DataFormatException("invalid id");
+        }
+
+        try {
+            List<Equipment> equipmentList = equipmentRepositoryService.findByReserve(reserve);
+            List<ReserveEquipment> reserveEquipments = reserveEquipmentRepositoryService.findByReserve(reserve);
+
+            try {
+                for(ReserveEquipment reserveEquipment : reserveEquipments){
+                    for(Equipment eq : equipmentList){
+                        if(reserveEquipment.getReserveEquipmentPK().getEquipment().getId() == eq.getId()){
+                            equipment = reserveEquipment.getReserveEquipmentPK().getEquipment();
+                        }
+                    }
+                    reserveEquipmentRepositoryService.deleteReserveEquipment(reserve.getId() , equipment.getId());
+                }
+            }catch (DataFormatException e){
+                throw new DataFormatException("delete reserve equipment fail");
+            }
+
+
+            reserveRepositoryService.delete(reserve);
+        } catch (DataFormatException e) {
+            throw new DataFormatException("delete reserve fail.");
+        }
     }
 }

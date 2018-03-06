@@ -3,9 +3,11 @@ package com.gaopai.maekhongbikebackend.service;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.gaopai.maekhongbikebackend.bean.RegisterBean;
+import com.gaopai.maekhongbikebackend.bean.UpdateUserProfileBean;
 import com.gaopai.maekhongbikebackend.domain.Users;
 import com.gaopai.maekhongbikebackend.exception.DataFormatException;
 import com.gaopai.maekhongbikebackend.repository.impl.UserRepositoryService;
+import com.gaopai.maekhongbikebackend.service.json.LoginJson;
 import com.gaopai.maekhongbikebackend.utils.DateUtil;
 import com.gaopai.maekhongbikebackend.utils.Utility;
 import org.slf4j.Logger;
@@ -15,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class UserService {
+public class UserService extends LoginJson {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
@@ -41,7 +43,6 @@ public class UserService {
             throw new DataFormatException("create course fail.");
         }
 
-
         return createUserJson(user);
     }
 
@@ -54,6 +55,19 @@ public class UserService {
         jsonNodes.put("phone_number", user.getPhoneNumber());
 
         return jsonNodes;
+    }
+
+    public ObjectNode updateProfileTrainer(Users user, UpdateUserProfileBean body) throws Exception {
+        ObjectNode responseNode = new ObjectNode(JsonNodeFactory.instance);
+        if (user != null) {
+            user.setDisplayName(body.getDisplay_name());
+            user.setName(body.getName());
+            user.setBirthDate(body.getBirthday());
+            user.setPhoneNumber(body.getPhone_number());
+            userRepositoryService.update(user);
+            responseNode = returnDetailUserLogin(user);
+        }
+        return responseNode;
     }
 }
 

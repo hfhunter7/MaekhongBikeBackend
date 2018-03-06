@@ -8,6 +8,7 @@ public class CreateReserveBean {
     private long adult;
     private long child;
     private String rent_status;
+    private String status_payment;
     private List<ReserveEquipmentBean> reserveEquipments;
 
     public CreateReserveBean(){
@@ -60,5 +61,13 @@ public class CreateReserveBean {
 
     public void setReserveEquipments(List<ReserveEquipmentBean> reserveEquipments) {
         this.reserveEquipments = reserveEquipments;
+    }
+
+    public String getStatus_payment() {
+        return status_payment;
+    }
+
+    public void setStatus_payment(String status_payment) {
+        this.status_payment = status_payment;
     }
 }

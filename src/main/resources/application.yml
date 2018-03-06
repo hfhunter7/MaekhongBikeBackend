@@ -76,9 +76,12 @@ spring:
 #    url: jdbc:mysql://128.199.250.71:3306/trainingcenterdb?useUnicode=yes&characterEncoding=UTF-8
 #    username: gaopai
 #    password: g@op@i
-    url: jdbc:mysql://35.201.192.129:3306/maekhongbike
-    username: root
-    password: admin1234
+#    url: jdbc:mysql://35.201.192.129:3306/maekhongbike
+#    username: root
+#    password: admin1234
+    url: jdbc:mysql://159.65.11.177:3306/maekhongbike?useUnicode=yes&characterEncoding=UTF-8
+    username: gaopai
+    password: g@op@i
     max-active: 1000
     max-idle: 100
     min-idle: 100
@@ -100,7 +103,7 @@ spring:
     name: 'staging profile:'
 
 server:
-    port: 9999
+    port: 8888
 
 security:
     basic:

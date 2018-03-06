@@ -20,6 +20,7 @@ public class Reserve implements Serializable{
     private long child;
     private String rent_status;
     private String reserve_number;
+    private String status_payment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Users user;
@@ -90,5 +91,13 @@ public class Reserve implements Serializable{
 
     public void setUser(Users user) {
         this.user = user;
+    }
+
+    public String getStatus_payment() {
+        return status_payment;
+    }
+
+    public void setStatus_payment(String status_payment) {
+        this.status_payment = status_payment;
     }
 }

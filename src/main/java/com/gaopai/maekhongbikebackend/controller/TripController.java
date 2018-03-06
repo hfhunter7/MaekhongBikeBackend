@@ -2,14 +2,15 @@ package com.gaopai.maekhongbikebackend.controller;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.gaopai.maekhongbikebackend.bean.reserve.CreateReserveBean;
-import com.gaopai.maekhongbikebackend.bean.reserve.UpdateAdultBean;
-import com.gaopai.maekhongbikebackend.bean.reserve.UpdateChildBean;
-import com.gaopai.maekhongbikebackend.bean.reserve.UpdateStatusPaymentBean;
+import com.gaopai.maekhongbikebackend.bean.trip.CreateTripBean;
+import com.gaopai.maekhongbikebackend.bean.trip.CreateTripImageBean;
+import com.gaopai.maekhongbikebackend.bean.trip.UpdateTripBean;
+import com.gaopai.maekhongbikebackend.bean.trip.UpdateTripImageBean;
 import com.gaopai.maekhongbikebackend.domain.Users;
 import com.gaopai.maekhongbikebackend.exception.ResourceNotFoundException;
+import com.gaopai.maekhongbikebackend.repository.impl.TripImageRepositoryService;
 import com.gaopai.maekhongbikebackend.service.JWTService;
-import com.gaopai.maekhongbikebackend.service.ReserveService;
+import com.gaopai.maekhongbikebackend.service.TripService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,30 +24,29 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
 
 @RestController
-@RequestMapping(value = "/v1/reserve")
-@Api(value = "reserve", description = "Reserves API")
-public class ReserveController extends AbstractRestHandler implements Serializable{
-    private static final long serialVersionUID = 4968157238077416074L;
+@RequestMapping(value = "/v1/trip")
+@Api(value = "trip", description = "Trip API")
+public class TripController extends AbstractRestHandler implements Serializable{
 
-    @Autowired
-    private ReserveService reserveService;
-
+    private static final long serialVersionUID = 3377415481951665685L;
     @Autowired
     private JWTService jwtService;
 
+    @Autowired
+    private TripService tripService;
 
     @RequestMapping(value = "", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "user reserve trip", notes = "user reserve trip")
+    @ApiOperation(value = "admin create trip", notes = "admin create trip")
     public @ResponseBody
-    ResponseEntity<?> createReserve(
+    ResponseEntity<?> createTrip(
             @RequestHeader(value = "Authorization") String Authorization,
-            @RequestBody CreateReserveBean body,
+            @RequestBody CreateTripBean body,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         try {
 
             Users user = jwtService.verifyTokenUser(Authorization);
-            ObjectNode responseBean = reserveService.createReserve(user,body);
+            ObjectNode responseBean = tripService.createTrip(body);
             return ResponseEntity.status(HttpStatus.OK).body(responseBean);
         } catch (ResourceNotFoundException e) {
             log.error("exception ", e);
@@ -54,17 +54,19 @@ public class ReserveController extends AbstractRestHandler implements Serializab
         }
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get reserve by user", notes = "Get reserve by user")
+    @RequestMapping(value = "/trip-image/{trip_id}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "admin create trip image", notes = "admin create trip image")
     public @ResponseBody
-    ResponseEntity<?> getReserveByUser(
+    ResponseEntity<?> createTripImage(
             @RequestHeader(value = "Authorization") String Authorization,
+            @RequestBody CreateTripImageBean body,
+            @PathVariable Long trip_id,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         try {
 
             Users user = jwtService.verifyTokenUser(Authorization);
-            ArrayNode responseBean = reserveService.getReserveByUser(user);
+            ObjectNode responseBean = tripService.createTripImage(body , trip_id);
             return ResponseEntity.status(HttpStatus.OK).body(responseBean);
         } catch (ResourceNotFoundException e) {
             log.error("exception ", e);
@@ -72,77 +74,39 @@ public class ReserveController extends AbstractRestHandler implements Serializab
         }
     }
 
-    @RequestMapping(value = "/{reserve_id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/image/{trip_id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "admin update trip image", notes = "admin update trip image")
+    public @ResponseBody
+    ResponseEntity<?> updateTripImage(
+            @RequestHeader(value = "Authorization") String Authorization,
+            @RequestBody UpdateTripImageBean body,
+            @PathVariable Long trip_id,
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        try {
+
+            Users user = jwtService.verifyTokenUser(Authorization);
+            ObjectNode responseBean = tripService.updateTripImage(body , trip_id);
+            return ResponseEntity.status(HttpStatus.OK).body(responseBean);
+        } catch (ResourceNotFoundException e) {
+            log.error("exception ", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @RequestMapping(value = "/{trip_id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "admin update trip", notes = "admin update trip")
     public @ResponseBody
-    ResponseEntity<?> updateStatusPayment(
+    ResponseEntity<?> updateTrip(
             @RequestHeader(value = "Authorization") String Authorization,
-            @RequestBody UpdateStatusPaymentBean body,
-            @PathVariable Long reserve_id,
+            @RequestBody UpdateTripBean body,
+            @PathVariable Long trip_id,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         try {
 
             Users user = jwtService.verifyTokenUser(Authorization);
-            ArrayNode responseBean = reserveService.updateStatusPayment(body , reserve_id , user);
-            return ResponseEntity.status(HttpStatus.OK).body(responseBean);
-        } catch (ResourceNotFoundException e) {
-            log.error("exception ", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-    @RequestMapping(value = "/child/{reserve_id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "admin update child", notes = "admin update child")
-    public @ResponseBody
-    ResponseEntity<?> updateChild(
-            @RequestHeader(value = "Authorization") String Authorization,
-            @RequestBody UpdateChildBean body,
-            @PathVariable Long reserve_id,
-            HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
-        try {
-
-            Users user = jwtService.verifyTokenUser(Authorization);
-            ObjectNode responseBean = reserveService.updateChild(body , reserve_id);
-            return ResponseEntity.status(HttpStatus.OK).body(responseBean);
-        } catch (ResourceNotFoundException e) {
-            log.error("exception ", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-    @RequestMapping(value = "/adult/{reserve_id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "admin update adult", notes = "admin update adult")
-    public @ResponseBody
-    ResponseEntity<?> updateAdult(
-            @RequestHeader(value = "Authorization") String Authorization,
-            @RequestBody UpdateAdultBean body,
-            @PathVariable Long reserve_id,
-            HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
-        try {
-
-            Users user = jwtService.verifyTokenUser(Authorization);
-            ObjectNode responseBean = reserveService.updateAdult(body , reserve_id);
-            return ResponseEntity.status(HttpStatus.OK).body(responseBean);
-        } catch (ResourceNotFoundException e) {
-            log.error("exception ", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-    @RequestMapping(value = "/all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get all reserve", notes = "Get all reserve")
-    public @ResponseBody
-    ResponseEntity<?> getAllReserves(
-            @RequestHeader(value = "Authorization") String Authorization,
-            HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
-        try {
-
-            Users user = jwtService.verifyTokenUser(Authorization);
-            ArrayNode responseBean = reserveService.getAllReserves();
+            ObjectNode responseBean = tripService.updateTrip(body , trip_id);
             return ResponseEntity.status(HttpStatus.OK).body(responseBean);
         } catch (ResourceNotFoundException e) {
             log.error("exception ", e);
@@ -151,9 +115,9 @@ public class ReserveController extends AbstractRestHandler implements Serializab
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get reserve detail by reserve id", notes = "Get reserve detail by reserve id")
+    @ApiOperation(value = "Get trip by id", notes = "Get trip by id")
     public @ResponseBody
-    ResponseEntity<?> getReserveByReserveId(
+    ResponseEntity<?> getTripById(
             @RequestHeader(value = "Authorization") String Authorization,
             @PathVariable Long id,
             HttpServletRequest request,
@@ -161,7 +125,7 @@ public class ReserveController extends AbstractRestHandler implements Serializab
         try {
 
             Users user = jwtService.verifyTokenUser(Authorization);
-            ObjectNode responseBean = reserveService.getReserveDetail(id,user);
+            ObjectNode responseBean = tripService.getTripById(id);
             return ResponseEntity.status(HttpStatus.OK).body(responseBean);
         } catch (ResourceNotFoundException e) {
             log.error("exception ", e);
@@ -169,20 +133,97 @@ public class ReserveController extends AbstractRestHandler implements Serializab
         }
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Delete reserve by id", notes = "Delete reserve by id")
+    @RequestMapping(value = "/trip-image/{trip_id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get image trip by trip id", notes = "Get image trip by trip id")
     public @ResponseBody
-    ResponseEntity<?> deleteReserveById(
+    ResponseEntity<?> getImageTripByTripId(
+            @RequestHeader(value = "Authorization") String Authorization,
+            @PathVariable Long trip_id,
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        try {
+
+            Users user = jwtService.verifyTokenUser(Authorization);
+            ArrayNode responseBean = tripService.getTripImageByTripId(user,trip_id);
+            return ResponseEntity.status(HttpStatus.OK).body(responseBean);
+        } catch (ResourceNotFoundException e) {
+            log.error("exception ", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @RequestMapping(value = "/all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get all trip", notes = "Get all trip")
+    public @ResponseBody
+    ResponseEntity<?> getAllTrip(
+            @RequestHeader(value = "Authorization") String Authorization,
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        try {
+
+            Users user = jwtService.verifyTokenUser(Authorization);
+            ArrayNode responseBean = tripService.getAllTrip(user);
+            return ResponseEntity.status(HttpStatus.OK).body(responseBean);
+        } catch (ResourceNotFoundException e) {
+            log.error("exception ", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @RequestMapping(value = "/image-url/{trip_id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get all trip", notes = "Get all trip")
+    public @ResponseBody
+    ResponseEntity<?> getAllImageUrlTrip(
+            @RequestHeader(value = "Authorization") String Authorization,
+            @PathVariable Long trip_id,
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        try {
+
+            Users user = jwtService.verifyTokenUser(Authorization);
+            ArrayNode responseBean = tripService.getTripImageByTripId(user , trip_id);
+            return ResponseEntity.status(HttpStatus.OK).body(responseBean);
+        } catch (ResourceNotFoundException e) {
+            log.error("exception ", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @RequestMapping(value = "/trip-image/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "delete trip image by id", notes = "delete trip image by id")
+    public @ResponseBody
+    ResponseEntity<?> deleteTripImageById(
             @RequestHeader(value = "Authorization") String Authorization,
             @PathVariable Long id,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         try {
+
             Users user = jwtService.verifyTokenUser(Authorization);
-            reserveService.deleteReserveById(id , user);
-            return ResponseEntity.status(HttpStatus.OK).body(responseSuccessMessage());
+            ObjectNode responseBean = tripService.deleteTripImageById(id);
+            return ResponseEntity.status(HttpStatus.OK).body(responseBean);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e);
+            log.error("exception ", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @RequestMapping(value = "/{trip_id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "delete trip by id", notes = "delete image by id")
+    public @ResponseBody
+    ResponseEntity<?> deleteTripById(
+            @RequestHeader(value = "Authorization") String Authorization,
+            @PathVariable Long trip_id,
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        try {
+
+            Users user = jwtService.verifyTokenUser(Authorization);
+            ObjectNode responseBean = tripService.deleteTripById(trip_id);
+            return ResponseEntity.status(HttpStatus.OK).body(responseBean);
+        } catch (ResourceNotFoundException e) {
+            log.error("exception ", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 }

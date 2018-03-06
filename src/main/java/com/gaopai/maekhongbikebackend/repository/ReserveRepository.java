@@ -1,6 +1,5 @@
 package com.gaopai.maekhongbikebackend.repository;
 
-import com.gaopai.maekhongbikebackend.domain.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.gaopai.maekhongbikebackend.domain.Reserve;

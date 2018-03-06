@@ -1,5 +1,6 @@
 package com.gaopai.maekhongbikebackend.repository.impl;
 
+import com.gaopai.maekhongbikebackend.domain.Reserve;
 import com.gaopai.maekhongbikebackend.domain.ReserveEquipment;
 import com.gaopai.maekhongbikebackend.repository.ReserveEquipmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,5 +48,13 @@ public class ReserveEquipmentRepositoryService {
 
     public void save(List<ReserveEquipment> reserveEquipments) {
         reserveEquipmentRepository.save(reserveEquipments);
+    }
+
+    public List<ReserveEquipment> findByReserve(Reserve reserve){
+        return reserveEquipmentRepository.findByReserve(reserve);
+    }
+
+    public void deleteReserveEquipment(Long reserve_id , Long equipment_id){
+        reserveEquipmentRepository.deleteReserveEquipment(reserve_id , equipment_id);
     }
 }
