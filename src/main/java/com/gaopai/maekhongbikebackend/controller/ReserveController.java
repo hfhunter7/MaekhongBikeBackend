@@ -150,6 +150,24 @@ public class ReserveController extends AbstractRestHandler implements Serializab
         }
     }
 
+    @RequestMapping(value = "/stat", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get all reserve stats", notes = "Get all reserve stats")
+    public @ResponseBody
+    ResponseEntity<?> getAllReserveStats(
+            @RequestHeader(value = "Authorization") String Authorization,
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        try {
+
+            Users user = jwtService.verifyTokenUser(Authorization);
+            ObjectNode responseBean = reserveService.getReserveStat();
+            return ResponseEntity.status(HttpStatus.OK).body(responseBean);
+        } catch (ResourceNotFoundException e) {
+            log.error("exception ", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get reserve detail by reserve id", notes = "Get reserve detail by reserve id")
     public @ResponseBody
